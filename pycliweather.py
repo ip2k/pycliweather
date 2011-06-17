@@ -50,27 +50,42 @@ def remove_whilespace_nodes(node, unlink=True):
 		if unlink:
 			node.unlink()
 
+def getFullWeather(someLocation):
+    # open our XML feed URL from wunderground.  Our query=default_location is already encoded in default_location.
+    feed = urllib2.urlopen('http://api.wunderground.com/auto/wui/geo/ForecastXML/index.xml?query=' + str(someLocation))
+
+    # read the feed into a huge string.  the -1 means we're getting all the bytes, so we don't have to guess / calculate
+    feedxml = feed.read(-1)
+
+    # call the xmltodict on our huge XML string
+    return xmltodict(feedxml)
+    
 # ---- Main ----
 
 # change our default location to the first arg passed to our script, if one is passed.
 # if not, it'll throw an index or value error, which we catch and proceed to just use the default location.
 try:
-    default_location = sys.argv[1]
+    location = sys.argv[1:]
+    location = ' '.join(location)
+# ghetto hack instead of urlencode because urlencode sucks
+    location = location.replace(' ', '+')
 except (IndexError, ValueError):
     print "Invalid location passed; using default location:", default_location
+    location = default_location
     pass
 
-# open our XML feed URL from wunderground
-feed = urllib2.urlopen('http://api.wunderground.com/auto/wui/geo/ForecastXML/index.xml?query=' + str(default_location))
-
-# read the feed into a huge string.  the -1 means we're getting all the bytes, so we don't have to guess / calculate
-feedxml = feed.read(-1)
-
-# call the xmltodict on our huge XML string
-fullweather = xmltodict(feedxml)
-
+fullweather = getFullWeather(location)
 # this gets you up to each day.  After that, have to dig into each to get whatever data you want.
-weather = fullweather['simpleforecast'][0]['forecastday']
+try:
+    weather = fullweather['simpleforecast'][0]['forecastday']
+except (TypeError):
+    if len(location) > 0:
+        print "Invalid location passed; using default location:", default_location
+    location = default_location
+    fullweather = getFullWeather(location)
+    weather = fullweather['simpleforecast'][0]['forecastday']
+    pass
+
 
 # range(len(weather)) iterates through each day.  The rest should be self-explanatory.
 # yes, the schema is confusing and stupid.  XML sucks for simple stuff like this; use JSON for your APIs!
@@ -81,7 +96,7 @@ sunset_hour = fullweather['moon_phase'][0]['sunset'][0]['hour'][0]
 sunset_minute = fullweather['moon_phase'][0]['sunset'][0]['minute'][0]
 moon = fullweather['moon_phase'][0]['percentIlluminated'][0]
 
-print 'Location:', default_location
+print 'Location:', location
 print 'Sunrise:', sunrise_hour + ':' + sunrise_minute
 print 'Sunset:', sunset_hour + ':' + sunset_minute
 print 'Moon visible:', moon + '% \n'
