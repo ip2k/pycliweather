@@ -69,13 +69,19 @@ def getFullWeather(someLocation):
 def showIndex():
     return render_template('index.html')
 
+"""
+@app.route('/weather', methods=['GET'])
+def getWeather():
+    toret = {'location':'sfo', 'dayname':request.args['location']}
+    return render_template('weather.html', weather=toret)
 
+"""
 @app.route('/weather', methods=['GET'])
 def getWeather():
     # change our default location to the first arg passed to our script, if one is passed.
     # if not, it'll throw an index or value error, which we catch and proceed to just use the default location.
     try:
-        location = request.form['location']
+        location = request.args['location']
 	print location
         location = ' '.join(location)
     # ghetto hack instead of urlencode because urlencode sucks in this case
@@ -87,14 +93,14 @@ def getWeather():
 
     fullweather = getFullWeather(location)
     # this gets you up to each day.  After that, have to dig into each to get whatever data you want.
-    try:
+    try: # try getting the weather for the locaiton provided
         weather = fullweather['simpleforecast'][0]['forecastday']
-    except (TypeError):
-        if len(location) > 0:
-            print "Invalid location passed; using default location:", default_location
-        location = default_location
-        fullweather = getFullWeather(location)
-        weather = fullweather['simpleforecast'][0]['forecastday']
+    except (TypeError): # if it fails because an invalid location is passed
+        if len(location) > 0: # and if the length is more than zero
+            print "Invalid location passed; using default location:", default_location # then they entered something and we should tell them it's invalid
+        location = default_location # in any case, we just use the default location
+        fullweather = getFullWeather(location) # and now we have to re-run getFullWeather
+        weather = fullweather['simpleforecast'][0]['forecastday'] # and we simplify our array
         pass
 
 
@@ -106,12 +112,13 @@ def getWeather():
     sunset_hour = fullweather['moon_phase'][0]['sunset'][0]['hour'][0]
     sunset_minute = fullweather['moon_phase'][0]['sunset'][0]['minute'][0]
     moon = fullweather['moon_phase'][0]['percentIlluminated'][0]
-
+    toret = {} # make a pretty array to return
     toret['sunrise'] = sunrise_hour + ':' + sunrise_minute
     toret['sunset'] = sunset_hour + ':' + sunset_minute
     toret['moon'] = moon + '%'
+    toret['location'] = request.args['location']
     
-    for i in range(len(weather)):
+    for i in range(len(weather)): # for i in however many days we get back
         toret['conditions'] = weather[i]['conditions'][0]
         toret['dayname'] = weather[i]['date'][0]['weekday'][0]
         toret['high'] = weather[i]['high'][0]['fahrenheit'][0]
@@ -125,5 +132,5 @@ if __name__ == "__main__":
     import xml.dom.minidom
     import urllib2
     import sys
+
     app.run()
-    getWeather()
