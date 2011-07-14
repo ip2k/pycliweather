@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+<ul class=days>
+    <li><h1>Weather for {{ weather.general.location }}</h2>
+    <li><h2>Sunrise: {{ weather.general.sunrise }}</h2>
+    <li><h2>Sunset: {{ weather.general.sunset }}</h2>
+    <li><h2>Moon Visibility: {{ weather.general.moon }}</h2>
+    #{% for day in weather.days %}
+        <li><h3>{{ day.dayname }} {{ day.conditions}} {{ day.high }}</h3>
+    {% endfor %}
+    <li><h3>{{ weather.days.0.dayname }} {{ weather.days.0.conditions }}</h3>
+    <li><h3>{{ weather.days.1.conditions }}</h3>
+    <li><h3>{{ weather.days.2.conditions }}</h3>
+    <li><h3>{{ weather.days.3.conditions }}</h3>
+    <li><h3>{{ weather.days.4.conditions }}</h3>
+</ul>
+{% endblock %}

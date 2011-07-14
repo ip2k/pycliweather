@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block body %}
+<h1>Weather for {{ weather.general.location }}</h1>
+<ul class=general>
+    <li><h2>Sunrise: {{ weather.general.sunrise }}</h2>
+    <li><h2>Sunset: {{ weather.general.sunset }}</h2>
+    <li><h2>Moon Visibility: {{ weather.general.moon }}</h2>
+</ul>
+<br />
+<h2>Forecast</h2>
+<ul class=forecast>
+    <li><h3>{{ weather.days.0.dayname }}: {{ weather.days.0.conditions }} {{ weather.days.0.low }}*F - {{ weather.days.0.high }}*F - {{ weather.days.0.precip }}% chance of rain</h3>
+    <li><h3>{{ weather.days.1.dayname }}: {{ weather.days.1.conditions }} {{ weather.days.1.low }}*F - {{ weather.days.1.high }}*F - {{ weather.days.1.precip }}% chance of rain</h3>
+    <li><h3>{{ weather.days.2.dayname }}: {{ weather.days.2.conditions }} {{ weather.days.2.low }}*F - {{ weather.days.2.high }}*F - {{ weather.days.2.precip }}% chance of rain</h3>
+    <li><h3>{{ weather.days.3.dayname }}: {{ weather.days.3.conditions }} {{ weather.days.3.low }}*F - {{ weather.days.3.high }}*F - {{ weather.days.3.precip }}% chance of rain</h3>
+    <li><h3>{{ weather.days.4.dayname }}: {{ weather.days.4.conditions }} {{ weather.days.4.low }}*F - {{ weather.days.4.high }}*F - {{ weather.days.4.precip }}% chance of rain</h3>
+    <li><h3>{{ weather.days.5.dayname }}: {{ weather.days.5.conditions }} {{ weather.days.5.low }}*F - {{ weather.days.5.high }}*F - {{ weather.days.5.precip }}% chance of rain</h3>
+</ul>
+{% endblock %}
