@@ -112,18 +112,21 @@ def getWeather():
     sunset_hour = fullweather['moon_phase'][0]['sunset'][0]['hour'][0]
     sunset_minute = fullweather['moon_phase'][0]['sunset'][0]['minute'][0]
     moon = fullweather['moon_phase'][0]['percentIlluminated'][0]
-    toret = {} # make a pretty array to return
-    toret['sunrise'] = sunrise_hour + ':' + sunrise_minute
-    toret['sunset'] = sunset_hour + ':' + sunset_minute
-    toret['moon'] = moon + '%'
-    toret['location'] = request.args['location']
+    toret = {} # make a dict of dicts to return
+    toret['general'] = {} # make the general dict inside the toret dict
+    toret['days'] = {} # same as above
+    toret['general']['sunrise'] = sunrise_hour + ':' + sunrise_minute # set some keys on the inner dict
+    toret['general']['sunset'] = sunset_hour + ':' + sunset_minute
+    toret['general']['moon'] = moon + '%'
+    toret['general']['location'] = request.args['location']
     
     for i in range(len(weather)): # for i in however many days we get back
-        toret['conditions'] = weather[i]['conditions'][0]
-        toret['dayname'] = weather[i]['date'][0]['weekday'][0]
-        toret['high'] = weather[i]['high'][0]['fahrenheit'][0]
-        toret['low'] = weather[i]['low'][0]['fahrenheit'][0]
-        toret['precip'] = weather[i]['pop'][0]
+        toret['days'][i] = {} # we need this since we're returning a dict of dicts and each has to be explicitally defined
+        toret['days'][i]['conditions'] = weather[i]['conditions'][0]
+        toret['days'][i]['dayname'] = weather[i]['date'][0]['weekday'][0]
+        toret['days'][i]['high'] = weather[i]['high'][0]['fahrenheit'][0]
+        toret['days'][i]['low'] = weather[i]['low'][0]['fahrenheit'][0]
+        toret['days'][i]['precip'] = weather[i]['pop'][0]
         #print dayname, '-', conditions, '-', low + 'F to', high + 'F -', precip + '% chance of rain'
     return render_template('weather.html', weather=toret)
 
