@@ -1,3 +1,12 @@
+# flask stuff
+from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
+
+# flask config
+DEBUG = True
+
+app = Flask(__name__)
+app.config.from_object(__name__)
+
 # ---- Config ----
 
 # set our default location
@@ -55,18 +64,19 @@ def getFullWeather(someLocation):
 
     # call the xmltodict on our huge XML string
     return xmltodict(feedxml)
-    
-# ---- Main ----
-if __name__ == "__main__":
-    import xml.dom.minidom
-    import urllib2
-    import sys
+
+@app.route('/')
+def showIndex():
+    return render_template('index.html')
 
 
+@app.route('/weather', methods=['GET'])
+def getWeather():
     # change our default location to the first arg passed to our script, if one is passed.
     # if not, it'll throw an index or value error, which we catch and proceed to just use the default location.
     try:
-        location = sys.argv[1:]
+        location = request.form['location']
+	print location
         location = ' '.join(location)
     # ghetto hack instead of urlencode because urlencode sucks in this case
         location = location.replace(' ', '+')
@@ -97,15 +107,23 @@ if __name__ == "__main__":
     sunset_minute = fullweather['moon_phase'][0]['sunset'][0]['minute'][0]
     moon = fullweather['moon_phase'][0]['percentIlluminated'][0]
 
-    print 'Location:', location
-    print 'Sunrise:', sunrise_hour + ':' + sunrise_minute
-    print 'Sunset:', sunset_hour + ':' + sunset_minute
-    print 'Moon visible:', moon + '% \n'
-
+    toret['sunrise'] = sunrise_hour + ':' + sunrise_minute
+    toret['sunset'] = sunset_hour + ':' + sunset_minute
+    toret['moon'] = moon + '%'
+    
     for i in range(len(weather)):
-        conditions = weather[i]['conditions'][0]
-        dayname = weather[i]['date'][0]['weekday'][0]
-        high = weather[i]['high'][0]['fahrenheit'][0]
-        low = weather[i]['low'][0]['fahrenheit'][0]
-        precip = weather[i]['pop'][0]
-        print dayname, '-', conditions, '-', low + 'F to', high + 'F -', precip + '% chance of rain'
+        toret['conditions'] = weather[i]['conditions'][0]
+        toret['dayname'] = weather[i]['date'][0]['weekday'][0]
+        toret['high'] = weather[i]['high'][0]['fahrenheit'][0]
+        toret['low'] = weather[i]['low'][0]['fahrenheit'][0]
+        toret['precip'] = weather[i]['pop'][0]
+        #print dayname, '-', conditions, '-', low + 'F to', high + 'F -', precip + '% chance of rain'
+    return render_template('weather.html', weather=toret)
+
+# ---- Main ----
+if __name__ == "__main__":
+    import xml.dom.minidom
+    import urllib2
+    import sys
+    app.run()
+    getWeather()
